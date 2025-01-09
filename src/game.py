@@ -1,13 +1,16 @@
 import pygame
 from typing import Dict, Optional
-from .states.game_state import GameState
+from src.states.game_state import GameState
+from src.states.menu_state import MenuState
+from src.states.pause_state import PauseState
+from src.states.play_state import PlayState
 
 
 class Game:
     def __init__(self, width: int = 1280, height: int = 720):
         pygame.init()
         self.screen = pygame.display.set_mode((width, height))
-        pygame.display.set_caption("Color Switcher")
+        pygame.display.set_caption("Space Color")
         self.clock = pygame.time.Clock()
         self.running = True
         self.states: Dict[str, GameState] = {}
@@ -16,8 +19,10 @@ class Game:
         self.init_states()
 
     def init_states(self) -> None:
+        self.states['pause'] = PauseState(self)
+        self.states['menu'] = MenuState(self)
+        self.states['play'] = PlayState(self)
         self.current_state = self.states['menu']
-
     def run(self) -> None:
         while self.running:
             self.handle_events()

@@ -1,5 +1,6 @@
 import pygame
 from .game_state import GameState
+from ..sprites.collectible import Collectible
 from ..sprites.player import Player
 from ..sprites.platform import Platform, MovingPlatform
 from ..utils.constants import COLORS
@@ -10,19 +11,28 @@ class PlayState(GameState):
         super().__init__(game)
         self.all_sprites = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
+        self.collectibles = pygame.sprite.Group()
         self.player = None
         self.init_level()
+
 
     def init_level(self) -> None:
         self.player = Player(100, 100)
         self.all_sprites.add(self.player)
+        self.collectibles = pygame.sprite.Group()
 
+        # Add platforms
         ground = Platform(0, 700, 1280, 20, "blue")
         platform1 = Platform(300, 500, 200, 20, "red")
         platform2 = MovingPlatform(600, 400, 200, 20, "yellow", move_x=200)
 
+        # Add collectibles
+        collectible1 = Collectible(350, 450, "red")
+        collectible2 = Collectible(650, 350, "yellow")
+
         self.platforms.add(ground, platform1, platform2)
-        self.all_sprites.add(ground, platform1, platform2)
+        self.collectibles.add(collectible1, collectible2)
+        self.all_sprites.add(ground, platform1, platform2, collectible1, collectible2)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN:
@@ -36,6 +46,8 @@ class PlayState(GameState):
                 self.player.change_color("yellow")
             elif event.key == pygame.K_ESCAPE:
                 self.game.change_state('menu')
+            elif event.key == pygame.K_p:
+                self.game.change_state('pause')
 
     def update(self) -> None:
         self.all_sprites.update()
@@ -53,6 +65,10 @@ class PlayState(GameState):
                     self.player.rect.y = 100
                     self.player.velocity_x = 0
                     self.player.velocity_y = 0
+
+        collected = pygame.sprite.spritecollide(self.player, self.collectibles, True)
+        for item in collected:
+         self.player.change_color(item.color)
 
     def render(self, screen: pygame.Surface) -> None:
         screen.fill(COLORS["black"])
