@@ -1,28 +1,28 @@
 import pygame
 from typing import Dict, Optional
-from src.states.game_state import GameState
-from src.states.menu_state import MenuState
-from src.states.pause_state import PauseState
-from src.states.play_state import PlayState
-
+from states.pause_state import PauseState
+from states.play_state import PlayState
+from states.game_state import GameState
+from states.menu_state import MenuState
 
 class Game:
     def __init__(self, width: int = 1280, height: int = 720):
         pygame.init()
+        pygame.mixer.init()
         self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Space Color")
         self.clock = pygame.time.Clock()
         self.running = True
         self.states: Dict[str, GameState] = {}
         self.current_state: Optional[GameState] = None
-
         self.init_states()
 
     def init_states(self) -> None:
-        self.states['pause'] = PauseState(self)
         self.states['menu'] = MenuState(self)
         self.states['play'] = PlayState(self)
+        self.states['pause'] = PauseState(self)
         self.current_state = self.states['menu']
+
     def run(self) -> None:
         while self.running:
             self.handle_events()
@@ -48,4 +48,6 @@ class Game:
 
     def change_state(self, state_name: str) -> None:
         if state_name in self.states:
+            if state_name == 'menu' and isinstance(self.current_state, PlayState):
+                self.states['menu'].final_score = self.current_state.score
             self.current_state = self.states[state_name]
