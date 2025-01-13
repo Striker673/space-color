@@ -2,6 +2,7 @@ import random
 from sprites.platform import Platform, MovingPlatform
 from sprites.collectible import Collectible, LevelEndOrb
 
+
 class LevelGenerator:
     def __init__(self, width: int, height: int):
         self.width = width
@@ -28,20 +29,20 @@ class LevelGenerator:
             x = min(last_x + gap + width, max_x_position)
 
             if x >= max_x_position:
-                platform = Platform(x - width, last_y, width, self.platform_height,random.choice(self.platform_colors))
+                platform = Platform(x - width, last_y, width, self.platform_height, random.choice(self.platform_colors))
                 platforms.append(platform)
-                end_orb = LevelEndOrb(x - width//2, last_y - 50)
+                end_orb = LevelEndOrb(x - width // 2, last_y - 50)
                 collectibles.append(end_orb)
                 break
 
             max_height_change = 150
             y = max(100, min(self.height - 100,
-                           last_y + random.randint(-max_height_change, max_height_change)))
+                             last_y + random.randint(-max_height_change, max_height_change)))
 
             color = random.choice(self.platform_colors)
 
             if random.random() < 0.3:
-                platform = MovingPlatform(x, y, width, self.platform_height, color,move_x=random.randint(100, 200))
+                platform = MovingPlatform(x, y, width, self.platform_height, color, move_x=random.randint(100, 200))
             else:
                 platform = Platform(x, y, width, self.platform_height, color)
 
@@ -57,9 +58,9 @@ class LevelGenerator:
         if last_x < max_x_position and not any(isinstance(c, LevelEndOrb) for c in collectibles):
             final_x = min(last_x + gap + width, max_x_position)
             final_platform = Platform(final_x - width, last_y, width, self.platform_height,
-                                  random.choice(self.platform_colors))
+                                      random.choice(self.platform_colors))
             platforms.append(final_platform)
-            end_orb = LevelEndOrb(final_x - width//2, last_y - 50)
+            end_orb = LevelEndOrb(final_x - width // 2, last_y - 50)
             collectibles.append(end_orb)
 
         return platforms, collectibles

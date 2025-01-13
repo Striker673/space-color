@@ -6,12 +6,11 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x: int, y: int):
         super().__init__()
         self.size = 40
-        self.image = pygame.Surface((self.size, self.size))
+        self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
-        # Movement variables
         self.velocity_x = 0
         self.velocity_y = 0
         self.speed = 7.5
@@ -20,10 +19,20 @@ class Player(pygame.sprite.Sprite):
         self.can_jump = True
         self.is_jumping = False
 
-        # Color
         self.current_color = "red"
         self.color = COLORS["red"]
-        self.image.fill(self.color)
+        self.glow_surface = None
+        self.glow_rect = None
+        self.update_appearance()
+
+    def update_appearance(self):
+        self.image.fill((0, 0, 0, 0))
+
+        pygame.draw.rect(self.image, self.color, (0, 0, self.size, self.size), border_radius=5)
+
+        highlight = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
+        pygame.draw.rect(highlight, (255, 255, 255, 50), (2, 2, self.size - 4, self.size // 3), border_radius=3)
+        self.image.blit(highlight, (0, 0))
 
     def update(self) -> None:
         self.apply_gravity()
@@ -46,8 +55,7 @@ class Player(pygame.sprite.Sprite):
         if color_name in COLORS and color_name != self.current_color:
             self.color = COLORS[color_name]
             self.current_color = color_name
-            self.image.fill(self.color)
-
+            self.update_appearance()
     def apply_gravity(self) -> None:
         self.velocity_y += self.gravity
 

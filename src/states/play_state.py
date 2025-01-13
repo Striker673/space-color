@@ -1,15 +1,18 @@
+# states/play_state.py
 import pygame
 from states.game_state import GameState
 from level_generator import LevelGenerator
 from sprites.player import Player
 from sprites.platform import Platform
-from utils.constants import COLORS
 from utils.camera import Camera
+from utils.constants import COLORS
+from utils.shader import Shader
+from utils.background import BackgroundManager
+
 
 class PlayState(GameState):
     def __init__(self, game):
         super().__init__(game)
-        # Sprite groups
         self.all_sprites = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.collectibles = pygame.sprite.Group()
@@ -18,6 +21,8 @@ class PlayState(GameState):
         self.player = None
         self.camera = Camera(game.screen.get_width(), game.screen.get_height())
         self.level_generator = LevelGenerator(game.screen.get_width() * 3, game.screen.get_height())
+
+        self.background = BackgroundManager(game.screen.get_width(), game.screen.get_height())
 
         self.score = 0
         self.lives = 10
@@ -40,7 +45,7 @@ class PlayState(GameState):
         border_height = self.game.screen.get_height() + 400
 
         top_border = Platform(0, -200, border_width, 1, "white")
-        bottom_border = Platform(-200, self.game.screen.get_height() + 200,border_width, 1, "white")
+        bottom_border = Platform(-200, self.game.screen.get_height() + 200, border_width, 1, "white")
         left_border = Platform(-200, -200, 1, border_height, "white")
         right_border = Platform(border_width - 200, -200, 1, border_height, "white")
 
@@ -75,14 +80,13 @@ class PlayState(GameState):
         self.all_sprites.update()
         self.handle_collisions()
         self.camera.update(self.player)
+        self.background.update()
 
     def handle_collisions(self) -> None:
-        # Border collisions
         if pygame.sprite.spritecollideany(self.player, self.borders):
             self.handle_death()
             return
 
-        # Platform collisions
         on_ground = False
         platforms_hit = pygame.sprite.spritecollide(self.player, self.platforms, False)
 
@@ -105,7 +109,6 @@ class PlayState(GameState):
             self.player.can_jump = False
             self.player.is_jumping = True
 
-        # Collectible collisions
         collectibles_hit = pygame.sprite.spritecollide(self.player, self.collectibles, True)
         for collectible in collectibles_hit:
             if hasattr(collectible, 'is_level_end'):
@@ -134,7 +137,13 @@ class PlayState(GameState):
         self.init_level()
 
     def render(self, screen: pygame.Surface) -> None:
-        screen.fill((20, 20, 40))
+        self.background.draw(screen, self.camera.camera.x)
+
+        for sprite in self.all_sprites:
+            if isinstance(sprite, (Player, Platform)) and hasattr(sprite, 'color') and sprite.color != "white":
+                Shader.apply_glow(sprite)
+                glow_rect = sprite.glow_surface.get_rect(center=sprite.rect.center)
+                screen.blit(sprite.glow_surface, self.camera.apply_rect(glow_rect))
 
         for sprite in self.all_sprites:
             screen.blit(sprite.image, self.camera.apply(sprite))

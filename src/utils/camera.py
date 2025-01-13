@@ -1,5 +1,6 @@
 import pygame
 
+
 class Camera:
     def __init__(self, width: int, height: int):
         self.camera = pygame.Rect(0, 0, width, height)
@@ -8,6 +9,9 @@ class Camera:
 
     def apply(self, entity: pygame.sprite.Sprite) -> pygame.Rect:
         return entity.rect.move(self.camera.topleft)
+
+    def apply_rect(self, rect: pygame.Rect) -> pygame.Rect:
+        return rect.move(self.camera.topleft)
 
     def update(self, target) -> None:
         x = -target.rect.centerx + self.width // 2

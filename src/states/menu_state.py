@@ -9,12 +9,10 @@ class MenuState(GameState):
         self.font = pygame.font.Font(None, 74)
         self.small_font = pygame.font.Font(None, 36)
 
-        # Text renders
         self.title = self.font.render('Space Color', True, COLORS["white"])
         self.start_text = self.font.render('Press SPACE to Start', True, COLORS["white"])
         self.quit_text = self.font.render('Press Q to Quit', True, COLORS["white"])
 
-        # Score tracking
         self.final_score = 0
         self.high_score = 0
 

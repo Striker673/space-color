@@ -5,6 +5,7 @@ from states.play_state import PlayState
 from states.game_state import GameState
 from states.menu_state import MenuState
 
+
 class Game:
     def __init__(self, width: int = 1280, height: int = 720):
         pygame.init()
