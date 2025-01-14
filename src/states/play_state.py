@@ -1,4 +1,3 @@
-# states/play_state.py
 import pygame
 from states.game_state import GameState
 from level_generator import LevelGenerator
@@ -8,6 +7,8 @@ from utils.camera import Camera
 from utils.constants import COLORS
 from utils.shader import Shader
 from utils.background import BackgroundManager
+
+from src.utils.audio_manager import AudioManager
 
 
 class PlayState(GameState):
@@ -27,15 +28,16 @@ class PlayState(GameState):
         self.score = 0
         self.lives = 10
         self.font = pygame.font.Font(None, 36)
+        self.audio_manager = AudioManager()
 
         self.init_level()
 
-    def init_level(self) -> None:
+    def init_level(self) :
         self.all_sprites.empty()
         self.platforms.empty()
         self.collectibles.empty()
         self.borders.empty()
-
+        self.background.change_background()
         if self.player:
             self.player.kill()
         self.player = Player(100, 100)
@@ -61,10 +63,11 @@ class PlayState(GameState):
             self.collectibles.add(collectible)
             self.all_sprites.add(collectible)
 
-    def handle_event(self, event: pygame.event.Event) -> None:
+    def handle_event(self, event: pygame.event.Event) :
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and self.player.can_jump:
                 self.player.jump()
+                self.audio_manager.play_sound('jump')
             elif event.key == pygame.K_q:
                 self.player.change_color("red")
             elif event.key == pygame.K_w:
@@ -76,13 +79,13 @@ class PlayState(GameState):
             elif event.key == pygame.K_r:
                 self.reset_game()
 
-    def update(self) -> None:
+    def update(self) :
         self.all_sprites.update()
         self.handle_collisions()
         self.camera.update(self.player)
         self.background.update()
 
-    def handle_collisions(self) -> None:
+    def handle_collisions(self) :
         if pygame.sprite.spritecollideany(self.player, self.borders):
             self.handle_death()
             return
@@ -92,13 +95,13 @@ class PlayState(GameState):
 
         for platform in platforms_hit:
             if self.player.current_color == platform.color:
-                if self.player.velocity_y > 0:  # Falling
+                if self.player.velocity_y > 0:
                     self.player.rect.bottom = platform.rect.top
                     self.player.velocity_y = 0
                     self.player.can_jump = True
                     self.player.is_jumping = False
                     on_ground = True
-                elif self.player.velocity_y < 0:  # Rising
+                elif self.player.velocity_y < 0:
                     self.player.rect.top = platform.rect.bottom
                     self.player.velocity_y = 0
             else:
@@ -111,14 +114,17 @@ class PlayState(GameState):
 
         collectibles_hit = pygame.sprite.spritecollide(self.player, self.collectibles, True)
         for collectible in collectibles_hit:
+            self.audio_manager.play_sound('collect')
             if hasattr(collectible, 'is_level_end'):
                 self.score += 10
+                self.background.change_background()
                 self.init_level()
             else:
                 self.score += 1
                 self.player.change_color(collectible.color)
 
-    def handle_death(self) -> None:
+    def handle_death(self) :
+        self.audio_manager.play_sound('death')
         self.player.rect.x = 100
         self.player.rect.y = 100
         self.player.velocity_x = 0
@@ -131,12 +137,13 @@ class PlayState(GameState):
                 self.game.states['menu'].final_score = self.score
             self.game.change_state('menu')
 
-    def reset_game(self) -> None:
+    def reset_game(self) :
+        self.background.change_background()
         self.lives = 10
         self.score = 0
         self.init_level()
 
-    def render(self, screen: pygame.Surface) -> None:
+    def render(self, screen: pygame.Surface) :
         self.background.draw(screen, self.camera.camera.x)
 
         for sprite in self.all_sprites:

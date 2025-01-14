@@ -36,8 +36,7 @@ class LevelGenerator:
                 break
 
             max_height_change = 150
-            y = max(100, min(self.height - 100,
-                             last_y + random.randint(-max_height_change, max_height_change)))
+            y = max(100, min(self.height - 100, last_y + random.randint(-max_height_change, max_height_change)))
 
             color = random.choice(self.platform_colors)
 

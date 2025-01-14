@@ -18,36 +18,36 @@ class Game:
         self.current_state: Optional[GameState] = None
         self.init_states()
 
-    def init_states(self) -> None:
+    def init_states(self) :
         self.states['menu'] = MenuState(self)
         self.states['play'] = PlayState(self)
         self.states['pause'] = PauseState(self)
         self.current_state = self.states['menu']
 
-    def run(self) -> None:
+    def run(self) :
         while self.running:
             self.handle_events()
             self.update()
             self.render()
             self.clock.tick(60)
 
-    def handle_events(self) -> None:
+    def handle_events(self) :
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
             if self.current_state:
                 self.current_state.handle_event(event)
 
-    def update(self) -> None:
+    def update(self) :
         if self.current_state:
             self.current_state.update()
 
-    def render(self) -> None:
+    def render(self) :
         if self.current_state:
             self.current_state.render(self.screen)
         pygame.display.flip()
 
-    def change_state(self, state_name: str) -> None:
+    def change_state(self, state_name: str) :
         if state_name in self.states:
             if state_name == 'menu' and isinstance(self.current_state, PlayState):
                 self.states['menu'].final_score = self.current_state.score

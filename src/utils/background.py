@@ -49,16 +49,12 @@ class Star:
 
     def draw(self, screen: pygame.Surface) -> None:
         if self.exploding:
-            pygame.draw.circle(screen, (255, 165, 0),
-                               (int(self.x), int(self.y)),
-                               int(self.explosion_radius))
+            pygame.draw.circle(screen, (255, 165, 0), (int(self.x), int(self.y)), int(self.explosion_radius))
         else:
             if len(self.trail) > 1:
                 pygame.draw.lines(screen, (150, 150, 150), False, self.trail, 1)
 
-            pygame.draw.circle(screen, (255, 255, 255),
-                               (int(self.x), int(self.y)),
-                               self.radius)
+            pygame.draw.circle(screen, (255, 255, 255), (int(self.x), int(self.y)), self.radius)
 
 
 class BackgroundManager:
@@ -68,21 +64,31 @@ class BackgroundManager:
         self.stars = []
         self.star_spawn_rate = 0.02
         self.max_stars = 50
-        self.bg_image = self.load_random_background()
+        self.bg_image = None
         self.parallax_factor = 0.5
+        self.current_bg_number = -1
+        self.load_random_background(force_new=True)
 
-    def load_random_background(self):
+    def load_random_background(self, force_new=False):
         try:
-            bg_number = random.randint(0, 16)
-            original_image = pygame.image.load(f"../assets/images/Space Background({bg_number}).png").convert()
+            if force_new:
+                new_bg_number = self.current_bg_number
+                while new_bg_number == self.current_bg_number:
+                    new_bg_number = random.randint(0, 16)
+                self.current_bg_number = new_bg_number
 
+            original_image = pygame.image.load(f"../assets/images/Space Background({self.current_bg_number}).png")
             height = self.height
             width = int(original_image.get_width() * (height / original_image.get_height()))
-            return pygame.transform.scale(original_image, (width, height))
-        except:
-            surface = pygame.Surface((self.width, self.height))
-            surface.fill((0, 0, 30))
-            return surface
+            self.bg_image = pygame.transform.scale(original_image, (width, height))
+
+        except Exception as e:
+            print(f"Error loading background: {e}")
+            self.bg_image = pygame.Surface((self.width, self.height))
+            self.bg_image.fill((0, 0, 30))
+
+    def change_background(self):
+        self.load_random_background(force_new=True)
 
     def update(self) -> None:
         if len(self.stars) < self.max_stars and random.random() < self.star_spawn_rate:
@@ -90,18 +96,17 @@ class BackgroundManager:
             speed = random.uniform(3, 7)
 
             if random.random() < 0.5:
-                self.stars.append(Star(0, y, speed, 1))  # Left side
+                self.stars.append(Star(0, y, speed, 1))
             else:
-                self.stars.append(Star(self.width, y, speed, -1))  # Right side
+                self.stars.append(Star(self.width, y, speed, -1))
 
         for star in self.stars:
             star.update()
             star.check_collision(self.stars)
 
-        self.stars = [star for star in self.stars
-                      if (0 < star.x < self.width) and star.alive]
+        self.stars = [star for star in self.stars if (0 < star.x < self.width) and star.alive]
 
-    def draw(self, screen: pygame.Surface, camera_x: float = 0) -> None:
+    def draw(self, screen: pygame.Surface, camera_x: float = 0):
         bg_x = -camera_x * self.parallax_factor
         bg_x = max(-(self.bg_image.get_width() - self.width), min(0, bg_x))
         screen.blit(self.bg_image, (bg_x, 0))

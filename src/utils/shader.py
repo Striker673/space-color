@@ -12,8 +12,7 @@ class GlowEffect:
 
         for i in range(3):
             size = original_surface.get_size()
-            scaled = pygame.transform.scale(original_surface,
-                                            (size[0] + (i * 4), size[1] + (i * 4)))
+            scaled = pygame.transform.scale(original_surface, (size[0] + (i * 4), size[1] + (i * 4)))
             scaled.set_alpha(150 - i * 30)
 
             color_surface = pygame.Surface(scaled.get_size(), pygame.SRCALPHA)
@@ -30,7 +29,7 @@ class GlowEffect:
 
 class Shader:
     @staticmethod
-    def apply_glow(sprite: pygame.sprite.Sprite) -> None:
+    def apply_glow(sprite: pygame.sprite.Sprite) :
         if hasattr(sprite, 'color'):
             color = sprite.color if isinstance(sprite.color, tuple) else COLORS[sprite.color]
         else:

@@ -13,7 +13,7 @@ class Camera:
     def apply_rect(self, rect: pygame.Rect) -> pygame.Rect:
         return rect.move(self.camera.topleft)
 
-    def update(self, target) -> None:
+    def update(self, target) :
         x = -target.rect.centerx + self.width // 2
         y = -target.rect.centery + self.height // 2
 
